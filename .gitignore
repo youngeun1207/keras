@@ -1,0 +1,8 @@
+# 데이터셋 무시
+datasets/
+# checkpoints 무시
+.ipynb_checkpoints/
+# 모델 저장본은 깃에 업로드 하지 말자
+*.h5
+#.DS_Store 무시
+.DS_Store
