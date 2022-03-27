@@ -2,8 +2,8 @@
 @import 'gaia';
 
 img{
-    margin-top: 15px;
-    margin-bottom: 15px;
+    margin-top: 10px;
+    margin-bottom: 5px;
 }
 table{
     font-size:19px;
@@ -31,17 +31,21 @@ section{
         font-size:26px;
         color: #416850;
     }
+    h5{
+        font-size:23px;
+        color: #416850;
+    }
     blockquote{
-        font-size:24px;
+        font-size:21px;
         margin-top: 10px;
         margin-left: 0px;
         margin-right: 0px;
-        padding-top: 15px;
-        padding-bottom:15px;
+        padding-top: 8px;
+        padding-bottom:8px;
         padding-left: 20px;
         padding-right: 20px;
         border-left: 8px solid #c8c8c8;
-        color:#303030;
+        color:#535353;
     }
     blockquote:before {
         content: none;
