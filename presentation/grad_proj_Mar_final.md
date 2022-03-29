@@ -23,8 +23,8 @@ paginate: true
     2. 사전 훈련된 Convnet 사용하기: VGG16
     3. Convnet의 학습 시각화하기
 3. **RNN**
-    1. simple RNN
-    2. LSTM
+    1. simple RNN, LSTM 모델을 사용한 이진 분류 문제: IMDB 데이터셋
+    2. GRU 모델을 사용한 기온 예측 문제: Jena Climate Dataset
 ---
 # 1. MLP 예제
 ## 1.1. 이진 분류 문제
@@ -604,4 +604,28 @@ paginate: true
 * 모델의 상위 층으로 갈수록 점점 더 복잡해지고 개선됨.
 ---
 ## 3.3. Convnet의 학습 시각화하기
-### 3.3.4. 클래스 활성화에 대한 heatmap을 이미지에 시각화
+### 3.3.4. 클래스 활성화에 heatmap 시각화하기
+* **클래스 활성화 맵**: 이미지의 어떤 부분이 컨브넷의 최종 분류 결정에 기여하는가?
+* 특정 출력 클래스에 대해 입력 이미지의 모든 위치를 계산한 2D 점수 그리드
+    ```python
+    from keras.applications.vgg16 import VGG16
+    model = VGG16(weights='imagenet') # 사전 훈련된 VGG16 네트워크 사용 (최상단의 완전연결분류기 포함)
+    ```
+    ![width:400px](./image/elephant_cam.jpg)
+    * 귀 위치에 강한 활성화 -> 컨브넷이 아프리카 코끼리와 인도 코끼리를 '귀'를 중점으로 구분하였음을 알 수 있다.
+---
+# 4. RNN
+## 4.1. simple RNN, LSTM 모델을 사용한 이진 분류 문제
+> IMDB dataset 영화 리뷰 분류
+### 4.1.1. 단어 임베딩
+### 4.1.2. simple RNN
+### 4.1.3. LSTM
+### 4.1.4. 양방향 LSTM
+---
+## 4.2. GRU 모델을 사용한 기온 예측 문제
+> Jena Climate Dataset 기온 예측
+### 4.2.1. Jena Climate 데이터셋 준비
+### 4.2.2. GRU를 사용한 모델
+### 4.2.3. 순환 드롭아웃
+### 4.2.4. 스태킹 GRU
+### 4.2.5. 1D convnet과 GRU 연결하기
