@@ -605,13 +605,10 @@ paginate: true
 ---
 ## 3.3. Convnet의 학습 시각화하기
 ### 3.3.4. 클래스 활성화에 heatmap 시각화하기
-* **클래스 활성화 맵**: 이미지의 어떤 부분이 컨브넷의 최종 분류 결정에 기여하는가?
-* 특정 출력 클래스에 대해 입력 이미지의 모든 위치를 계산한 2D 점수 그리드
-    ```python
-    from keras.applications.vgg16 import VGG16
-    model = VGG16(weights='imagenet') # 사전 훈련된 VGG16 네트워크 사용 (최상단의 완전연결분류기 포함)
-    ```
-    ![width:400px](./image/elephant_cam.jpg)
+* **클래스 활성화 맵**
+    * 이미지의 어떤 부분이 컨브넷의 최종 분류 결정에 기여하는가?
+    * 특정 출력 클래스에 대해 입력 이미지의 모든 위치를 계산한 2D 점수 그리드!
+    ![width:450px](./image/elephant_cam.jpg)
     * 귀 위치에 강한 활성화 -> 컨브넷이 아프리카 코끼리와 인도 코끼리를 '귀'를 중점으로 구분하였음을 알 수 있다.
 ---
 # 4. RNN
