@@ -615,14 +615,53 @@ paginate: true
 ## 4.1. simple RNN, LSTM 모델을 사용한 이진 분류 문제
 > IMDB dataset 영화 리뷰 분류
 ### 4.1.1. 단어 임베딩
+* 단어 벡터 사이에 조금 더 추상적이고 기하학적인 관계를 얻기 위해 단어 사이에 있는 의미 관계를 반영하기 
+    * 언어를 기하학적 공간에 매핑하기 
+    * 잘 구축된 임베딩 공간에서는 동의어가 비슷한 단어 벡터로 임베딩될 것.. 
+    * 일반적으로 두 단어 벡터 사이의 거리(L2 거리)는 이 단어 사이의 의미 거리와 관계
+    (서로 의미가 다른 단어는 멀리 떨어진 위치에, 비슷한 단어들은 가까이)
+    ```python
+    model.add(Embedding(max_features, 32))
+    ```
+---
+## 4.1. simple RNN, LSTM 모델을 사용한 이진 분류 문제
 ### 4.1.2. simple RNN
+#### 4.1.2.1. IMDB 데이터 전처리
+```python
+from keras.datasets import imdb
+from keras.preprocessing import sequence
+
+max_features = 10000  # 특성으로 사용할 단어의 수
+maxlen = 500  # 사용할 텍스트의 길이(가장 빈번한 max_features 개의 단어만 사용)
+batch_size = 32
+(input_train, y_train), (input_test, y_test) = imdb.load_data(num_words=max_features)
+input_train = sequence.pad_sequences(input_train, maxlen=maxlen)
+input_test = sequence.pad_sequences(input_test, maxlen=maxlen)
+```
+---
+## 4.1. simple RNN, LSTM 모델을 사용한 이진 분류 문제
+#### 4.1.2.2. Embedding 층과 SimpleRNN층을 사용한 모델 훈련
+```python
+model = Sequential()
+model.add(Embedding(max_features, 32))
+model.add(SimpleRNN(32))
+model.add(Dense(1, activation='sigmoid'))
+
+model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
+history = model.fit(input_train, y_train, epochs=10, batch_size=128, validation_split=0.2)
+```
+#### 4.1.2.3. 훈련과 검증 결과
+![width:630px](./image/simpleRNN.png)
+
+---
+## 4.1. simple RNN, LSTM 모델을 사용한 이진 분류 문제
 ### 4.1.3. LSTM
+---
+## 4.1. simple RNN, LSTM 모델을 사용한 이진 분류 문제
 ### 4.1.4. 양방향 LSTM
 ---
 ## 4.2. GRU 모델을 사용한 기온 예측 문제
 > Jena Climate Dataset 기온 예측
 ### 4.2.1. Jena Climate 데이터셋 준비
 ### 4.2.2. GRU를 사용한 모델
-### 4.2.3. 순환 드롭아웃
-### 4.2.4. 스태킹 GRU
-### 4.2.5. 1D convnet과 GRU 연결하기
+### 4.2.3. 1D convnet과 GRU 연결하기
