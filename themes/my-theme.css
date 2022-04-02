@@ -2,8 +2,8 @@
 @import 'gaia';
 
 img{
-    margin-top: 10px;
-    margin-bottom: 5px;
+    margin-top: 0px;
+    margin-bottom: -10px;
 }
 table{
     font-size:19px;
@@ -30,10 +30,12 @@ section{
     h4{
         font-size:26px;
         color: #416850;
+        margin-bottom: -10px;
     }
     h5{
         font-size:23px;
         color: #416850;
+        margin-bottom: -10px;
     }
     blockquote{
         font-size:21px;
@@ -60,4 +62,5 @@ section{
         padding-bottom:10px;
         padding-left: 15px;
         padding-right: 15px;
+        margin-bottom: -10px;
     }

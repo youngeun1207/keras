@@ -161,7 +161,9 @@ paginate: true
 ## 1.2. 다중 분류 문제
 ### 1.2.3. 훈련 검증
 * train 데이터셋 일부(1000개)를 떼어내 검증 셋으로 사용
+
 ![width:730px](./image/mul_graph.png)
+
 * 8번 에포크 이후 과대적합 발생 -> 에포크 8번으로 감소한 후 테스트
 
 ---
@@ -416,9 +418,10 @@ paginate: true
 ## 3.1. 작은 데이터셋 이진 분류 문제
 ### 3.1.7. 훈련과 검증 결과
 * 데이터 증식 & 드롭아웃 적용 전: 72.4%
-![width:490px](./image/cnn_small_1.png)
+![width:550px](./image/cnn_small_1.png)
+
 * 데이터 증식 & 드롭아웃 적용 후: 76.6%
-![width:490px](./image/cnn_small_2.png)
+![width:550px](./image/cnn_small_2.png)
     * 훈련과 검증 그래프 가까워짐
 ---
 ## 3.2. 사전 훈련된 Convnet 사용하기
@@ -566,12 +569,18 @@ max_features = 10000  # 특성으로 사용할 단어의 수
 maxlen = 500  # 사용할 텍스트의 길이(가장 빈번한 max_features 개의 단어만 사용)
 batch_size = 32
 (input_train, y_train), (input_test, y_test) = imdb.load_data(num_words=max_features)
+# 시퀀스 패딩 (samples x time) -> 문장 길이 임의로 동일하게 맞추기
 input_train = sequence.pad_sequences(input_train, maxlen=maxlen)
 input_test = sequence.pad_sequences(input_test, maxlen=maxlen)
 ```
+* 훈련 시퀀스 길이: 25000
+* 테스트 시퀀스 길이: 25000 
+* input_train 크기: (25000, 500)
+* input_test 크기: (25000, 500)
+
 ---
 ## 4.1. simple RNN, LSTM 모델을 사용한 이진 분류 문제
-#### 4.1.2.2. Embedding 층과 SimpleRNN층을 사용한 모델 훈련
+#### 4.1.2.2. Embedding 층과 SimpleRNN층을 사용한 모델
 ```python
 model = Sequential()
 model.add(Embedding(max_features, 32))
@@ -581,18 +590,165 @@ model.add(Dense(1, activation='sigmoid'))
 model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
 history = model.fit(input_train, y_train, epochs=10, batch_size=128, validation_split=0.2)
 ```
-#### 4.1.2.3. 훈련과 검증 결과
-![width:630px](./image/simpleRNN.png)
+#### 4.1.2.3. 훈련과 검증 그래프 및 test 결과
+![width:600px](./image/simpleRNN.png)
+* test결과: 79% 정확도
 
 ---
 ## 4.1. simple RNN, LSTM 모델을 사용한 이진 분류 문제
 ### 4.1.3. LSTM
+#### 4.1.3.1. Embedding 층과 LSTM층을 사용한 모델
+```python
+model = Sequential()
+model.add(Embedding(max_features, 32))
+model.add(LSTM(32))
+model.add(Dense(1, activation='sigmoid'))
+model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
+```
+#### 4.1.3.2. 훈련과 검증 그래프 및 test 결과
+![width:600px](./image/LSTM.png)
+* test결과: 86% 정확도
 ---
 ## 4.1. simple RNN, LSTM 모델을 사용한 이진 분류 문제
 ### 4.1.4. 양방향 LSTM
+#### 4.1.3.1. Embedding 층과 LSTM층을 사용한 모델
+```python
+model = Sequential()
+model.add(Embedding(max_features, 32))
+model.add(Bidirectional(LSTM(32)))
+model.add(Dense(1, activation='sigmoid'))
+model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
+```
+#### 4.1.4.2. 훈련과 검증 그래프 및 test 결과
+![width:600px](./image/bi_LSTM.png)
+* test결과: 86% 정확도
 ---
 ## 4.2. GRU 모델을 사용한 기온 예측 문제
 > Jena Climate Dataset 기온 예측
 ### 4.2.1. Jena Climate 데이터셋 준비
-### 4.2.2. GRU를 사용한 모델
-### 4.2.3. 1D convnet과 GRU 연결하기
+* ```(samples, targets)``` 튜플을 반복적으로 반환하는 제너레이터 만들기
+    * samples: 입력 데이터로 사용할 배치
+    * targets: 타깃 온도의 배열
+* 훈련용, 검증용, 테스트용 generator는 원본 데이터에서 다른 시간대를 사용
+    * train_gen: 처음 200,000개 타임스텝 사용
+    * val_gen: 그 다음 100,000개
+    * test_gen: 나머지
+    ```python
+    lookback = 1440 # 10일 전 데이터로 돌아가기
+    step = 6 # 1시간마다 데이터 포인트 1개 샘플링
+    delay = 144 # 24시간이 지난 데이터를 타깃으로
+    batch_size = 128 # 배치 샘플 수
+    _gen = generator(float_data, lookback=lookback, delay=delay, 
+                        min_index=0, max_index=200000, # 각 제너레이터마다 다른 시간대 설정
+                        shuffle=True, step=step, batch_size=batch_size)
+    ```
+---
+## 4.2. GRU 모델을 사용한 기온 예측 문제
+### 4.2.2. 상식 수준의 기준점 설정
+![width:600px](./image/jena.png)
+* Jena climate 데이터는 일정한 주기성을 보임 -> 기온이 **전날, 같은 시간**의 온도와 비슷할 것이라 가정
+    ```python
+    def evaluate_naive_method():
+        batch_maes = []
+        for step in range(val_steps):
+            samples, targets = next(val_gen)
+            preds = samples[:, -1, 1]
+            mae = np.mean(np.abs(preds - targets))
+            batch_maes.append(mae)
+        return np.mean(batch_maes)
+    ```
+---
+## 4.2. GRU 모델을 사용한 기온 예측 문제
+### 4.2.3. GRU
+> LSTM보다 가벼운 RNN 변형 모델
+#### 4.2.3.1. GRU층을 사용한 모델
+```python
+model = Sequential()
+model.add(layers.GRU(32, input_shape=(None, float_data.shape[-1])))
+model.add(layers.Dense(1))
+
+model.compile(optimizer=RMSprop(), loss='mae')
+history = model.fit_generator(train_gen,
+                              steps_per_epoch=500, epochs=20,
+                              validation_data=val_gen,
+                              validation_steps=val_steps)
+```
+---
+## 4.2. GRU 모델을 사용한 기온 예측 문제
+#### 4.2.3.1. 훈련과 검증 손실 그래프
+![width:320px](./image/GRU.png)
+* 검증 MAE: 2.82°C
+#### 4.2.3.3. 처음부터 다시 학습 후 Test
+```python
+from tensorflow.keras.callbacks import EarlyStopping
+# EarlyStopping: 검증 데이터 손실이 3회 증가하면(과대적합) 정해진 에포크가 도달하지 못하였더라도 학습 조기 종료
+es = EarlyStopping(monitor='val_loss', mode='min', verbose=1, patience=3)
+history = model.fit_generator(train_gen, steps_per_epoch=500, epochs=20,
+                              validation_data=val_gen, validation_steps=val_steps,
+                              callbacks=[es])
+```
+* test MAE: 2.50°C
+---
+## 4.2. GRU 모델을 사용한 기온 예측 문제
+### 4.2.4. 1D convnet과 GRU 연결하기
+> 컨브넷의 속도와 경량함 + RNN의 순서 감지 능력
+#### 4.2.4.1. 고밀도 데이터 제너레이터 만들기
+* 1D 컨브넷을 RNN 이전에 전처리 단계로 사용 -> 훨씬 긴 시퀀스를 다룰 수 있음
+    * 더 오래 전 데이터를 볼 수 있음(제너레이터의 ```lookback``` 증가)
+    * 시계열 데이터를 더 촘촘하게 볼 수 있음(제너레이터의 ```step``` 감소)
+    ```python
+    lookback = 1440 # 10일 전 데이터로 돌아가기
+    step = 3 # 30분마다 1 포인트로 줄이기 -> 데이터 2배 많이 사용(아까는 60분에 1포인트)
+    delay = 144 # 24시간이 지난 데이터를 타깃으로
+    batch_size = 128 # 배치 샘플 수
+    _gen = generator(float_data, lookback=lookback, delay=delay, 
+                    min_index=0, max_index=200000, # 각 제너레이터마다 다른 시간대 설정
+                    shuffle=True, step=step, batch_size=batch_size)
+    ```
+---
+## 4.2. GRU 모델을 사용한 기온 예측 문제
+#### 4.2.4.2. 1D convnet과 GRU 연결한 모델
+* 2개의 Conv1D 층 다음에 GRU 층을 놓은 모델
+    ```python
+    model = Sequential()
+    model.add(layers.Conv1D(32, 5, activation='relu',
+                            input_shape=(None, float_data.shape[-1])))
+    model.add(layers.MaxPooling1D(3))
+    model.add(layers.Conv1D(32, 5, activation='relu'))
+    model.add(layers.GRU(32))
+    model.add(layers.Dense(1))
+
+    model.compile(optimizer=RMSprop(), loss='mae')
+    history = model.fit_generator(train_gen,
+                                steps_per_epoch=500, epochs=20,
+                                validation_data=val_gen, validation_steps=val_steps)
+    ```
+---
+## 4.2. GRU 모델을 사용한 기온 예측 문제
+#### 4.2.4.3. 훈련과 검증 손실 그래프
+![width:350px](./image/1Dconv_GRU.png)
+* 검증 MAE: 2.82°C
+#### 4.2.4.4. 처음부터 다시 학습 후 Test
+* ```EarlyStopping```으로  검증 데이터 손실이 3회 증가하면(과대적합) 정해진 에포크가 도달하지 못하였더라도 학습 조기 종료
+* test MAE: 3.44°C
+    * GRU모델에 비해 성능이 떨어짐
+    * 속도 훨씬 빠르다(각 에포크마다 10s이상 감축)
+---
+## 4.2. GRU 모델을 사용한 기온 예측 문제
+### 4.2.5. 완전연결모델과 성능 비교
+* **상식 수준 기준점**: 2.56°C
+
+* **완전연결모델**
+    * 일부 검증 점수는 상식수준 기준점에 근접하지만 안정적이지 못하다
+    * 검증 MAE: 2.63°C (최소값)
+    * test MAE: 10.79°C
+
+* **GRU모델** 
+    * 가장 성능이 좋음(상식수준 기준점 이상) 그러나 오래걸림 
+    * 검증 MAE: 2.30°C
+    * test MAE: 2.50°C
+
+* **1D CNN 결합 모델**
+    * 속도는 빠르지만 성능은 GRU보다 낮음
+    * 검증 MAE: 2.82°C
+    * test MAE: 3.44°C
