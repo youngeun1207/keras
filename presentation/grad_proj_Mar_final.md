@@ -29,7 +29,7 @@ paginate: true
 ## 1.1. 이진 분류 문제
 > IMDB dataset 영화 리뷰 분류
 ### 1.1.1. 데이터 준비하기
-#### 1.1.1.1 IMDB 데이터셋 로드 후 훈련, 테스트 데이터로 나누기
+#### 1.1.1.1. IMDB 데이터셋 로드 후 훈련, 테스트 데이터로 나누기
 * 훈련과 테스트를 같은 데이터로 하면 안됨!
     * 모델은 처음 보는 데이터에 대한 성능이 중요!
     * 모델에는 이미 훈련 데이터에 맞는 규칙이 반영되었기 때문에 성능 평가 단계에서는 학습에 사용되지 않은 데이터 사용
@@ -57,7 +57,7 @@ paginate: true
 ---
 ## 1.1. 이진 분류 문제
 ### 1.1.2. 신경망 모델 만들기
-#### 1.1.2.1 완전 연결 신경망
+#### 1.1.2.1. 완전 연결 신경망
 * ```relu``` 활성화 함수를 사용한 ```Dense```층 쌓기
     1. 16개의 은닉 유닛을 가진 두 개의 은닉층
     2. 현재 리뷰의 감정을 스칼라 값의 예측으로 출력하는 마지막 층
@@ -660,7 +660,9 @@ model.compile(optimizer='rmsprop', loss='binary_crossentropy', metrics=['acc'])
 ---
 ## 4.2. GRU 모델을 사용한 기온 예측 문제
 ### 4.2.3. GRU
-> LSTM보다 가벼운 RNN 변형 모델
+> LSTM보다 계산 비용 적게 드는 RNN 변형 모델
+* 인과 관계와 순서가 의미 있는 시퀀스 데이터 
+-> 데이터 포인터의 시간 순서를 사용한 순환 시퀀스 처리 모델
 #### 4.2.3.1. GRU층을 사용한 모델
 ```python
 model = Sequential()
@@ -676,7 +678,7 @@ history = model.fit_generator(train_gen,
 ---
 ## 4.2. GRU 모델을 사용한 기온 예측 문제
 #### 4.2.3.1. 훈련과 검증 손실 그래프
-![width:320px](./image/GRU.png)
+![width:310px](./image/GRU.png)
 * 검증 MAE: 2.82°C
 #### 4.2.3.3. 처음부터 다시 학습 후 Test
 ```python
@@ -709,6 +711,8 @@ history = model.fit_generator(train_gen, steps_per_epoch=500, epochs=20,
 ## 4.2. GRU 모델을 사용한 기온 예측 문제
 #### 4.2.4.2. 1D convnet과 GRU 연결한 모델
 * 2개의 Conv1D 층 다음에 GRU 층을 놓은 모델
+    * 1D convnet을 RNN 이전에 전처리 단계로 사용
+    * 1D convnet이 긴 입력 시퀀스를 더 짧은 고수준 특성의(다운샘플된) 시퀀스로 변환
     ```python
     model = Sequential()
     model.add(layers.Conv1D(32, 5, activation='relu',
@@ -720,8 +724,8 @@ history = model.fit_generator(train_gen, steps_per_epoch=500, epochs=20,
 
     model.compile(optimizer=RMSprop(), loss='mae')
     history = model.fit_generator(train_gen,
-                                steps_per_epoch=500, epochs=20,
-                                validation_data=val_gen, validation_steps=val_steps)
+                                  steps_per_epoch=500, epochs=20,
+                                  validation_data=val_gen, validation_steps=val_steps)
     ```
 ---
 ## 4.2. GRU 모델을 사용한 기온 예측 문제
